@@ -1,0 +1,4 @@
+rootProject.name = 'infogram'
+include "frontend"
+include 'backend'
+

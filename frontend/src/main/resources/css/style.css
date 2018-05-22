@@ -1,0 +1,59 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    background: #fff;
+    font-family: 'Exo 2', sans-serif;
+}
+
+#menu
+{
+    background: #0000ff;
+    color: white;
+    font-weight: 600;
+    padding: 20px;
+}
+
+.homeButton{
+    background-image: url("/css/logo.png");
+}
+
+.noHover
+{
+    border: 1px solid #000;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    padding: 8px;
+    width: auto;
+    height: auto;
+    background: #0000ff;
+    margin: 5px;
+}
+
+.hover{
+    border: 1px solid #000;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    padding: 8px;
+    width: auto;
+    height: auto;
+    background: #009bff;
+}
+
+#userInfo{
+    border: 2px solid blueviolet;
+    padding: 10px;
+    margin: 15px;
+}
+
+#footer{
+    background: #0000ff;
+    color: white;
+    font-weight: 600;
+    padding: 20px;
+    font-size: 25px;
+}
