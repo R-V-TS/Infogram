@@ -27,6 +27,18 @@ class Controller(@Autowired val repository: UsersRepository, @Autowired val mess
     @GetMapping("/all")
     fun allUser() = repository.findAll()
 
+    @GetMapping("/login")
+    fun login(@RequestParam("id") _id:Long,
+              @RequestParam("password") _pass:String): String {
+        var b = false
+        var username = " "
+        repository.findById(_id).map { if(_pass == it.pass){username = "${it.lastname} ${it.firstname}"; b = true;} }
+        if(b)
+            return username
+        else
+            return "error"
+    }
+
     @PostMapping("/sendMessage")
     fun addMessage(@RequestParam("id") _id:String,
                    @RequestParam("pass") _pass:String,
@@ -34,8 +46,9 @@ class Controller(@Autowired val repository: UsersRepository, @Autowired val mess
                    @RequestParam("message") _message:String): String {
         if(_id == _id_user)
         {
-            return "<html><head><title>Error 1</title></head><body>You can not write to yourself<br><a href='http://localhost:8080/user/sendMessage.html'>Back</a></body></html>"
+            return "Error"
         }
+
         else
         {
             val id = _id.toLong()
@@ -49,21 +62,23 @@ class Controller(@Autowired val repository: UsersRepository, @Autowired val mess
                 messageRepository.findAll().forEach { if (it.id > max_id_mes) max_id_mes = it.id }
                 var dial1: Boolean = false
                 var dial2: Boolean = false //Для проверки на присудствие диалога
-                var id_dialog: Long = 0
-                dialogsRepository.findByUser1id(_id).map { if(it.user2id == _id_user) {dial1 = true; id_dialog = it.id} }
-                dialogsRepository.findByUser2id(_id).map { if(it.user1id == _id_user) {dial2 = true; id_dialog = it.id} }
-                if(!dial1 && !dial2)
+                var id_dialog: Long = -1
+                dialogsRepository.findAll().filter{it.user2id == _id_user || it.user1id == _id_user}.map {
+                    if(it.user1id == _id) dial1 = true; id_dialog = it.id
+                    if(it.user2id == _id) dial2 = true; id_dialog = it.id
+                }
+                if(id_dialog == (-1).toLong())
                 {
-                    dialogsRepository.save(Dialogs(id = max_id_dialog+1, user1id = _id, user2id = _id_user))
-                    // Если диалогa нет то создаем
-                    dialogsRepository.findByUser1id(_id).filter{it.user2id == _id_user}.map { id_dialog = it.id }
+                    id_dialog = max_id_dialog+1
+                    dialogsRepository.save(Dialogs(id = id_dialog, user1id = _id, user2id = _id_user))
+                    // Если диалогa нет то создае
                 }
                 if(dial2) messageRepository.save(Message(id = max_id_mes+1, id_dialog = id_dialog.toString(), id_user = "2", message = _message)) // Добавляем запись в диалог от имени второго пользователя
                 else messageRepository.save(Message(id = max_id_mes+1, id_dialog = id_dialog.toString(), id_user = "1", message = _message)) //Запись в диалог от имени первого пользователя
 
             }
         }
-        return "redirect: /index.html"
+        return "Ok"
     }
 
     @GetMapping("/myMessage")
@@ -82,6 +97,12 @@ class Controller(@Autowired val repository: UsersRepository, @Autowired val mess
     @RequestMapping("/allMessage")
     fun allMess(): MutableIterable<Dialogs> {
         return dialogsRepository.findAll()
+    }
+
+    @GetMapping("/aboutId")
+    fun aboutId(@RequestParam("id") _id: Long): List<Users> {
+        val user = repository.findAll().filter { it.id == _id}.toList()
+        return user
     }
 
     @RequestMapping("/dropAll")

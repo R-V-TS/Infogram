@@ -2,12 +2,13 @@ import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLLabelElement
+import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventListener
 import org.w3c.xhr.XMLHttpRequest
 import kotlin.browser.document
 import kotlin.dom.appendText
 
-fun registration_form()
+fun login_form()
 {
     val dc = document.getElementById("app") as HTMLElement
     dc.remove()
@@ -17,27 +18,17 @@ fun registration_form()
     registration.id = "registration"
 
     val title = document.createElement("h2") as HTMLElement
-    title.appendText("Регистрация")
+    title.appendText("Вход")
     registration.appendChild(title)
 
     val label1 = document.createElement("label") as HTMLLabelElement
-    label1.htmlFor = "name"
-    label1.textContent = "Name: "
+    label1.htmlFor = "id"
+    label1.textContent = "Id: "
     registration.appendChild(label1)
     val input_name = document.createElement("input") as HTMLInputElement
-    input_name.id = "name"
+    input_name.id = "id"
     input_name.type = "text"
     registration.appendChild(input_name)
-    registration.appendChild(document.createElement("br"))
-
-    val label2 = document.createElement("label") as HTMLLabelElement
-    label2.htmlFor = "surname"
-    label2.textContent = "Surname: "
-    registration.appendChild(label2)
-    val input_surname = document.createElement("input") as HTMLInputElement
-    input_surname.id = "surname"
-    input_surname.type = "text"
-    registration.appendChild(input_surname)
     registration.appendChild(document.createElement("br"))
 
     val label3 = document.createElement("label") as HTMLLabelElement
@@ -52,8 +43,8 @@ fun registration_form()
 
     val button = document.createElement("button") as HTMLButtonElement
     button.id = "ok"
-    button.textContent = "Registration"
-    button.addEventListener("click", processregistration())
+    button.textContent = "Login"
+    button.addEventListener("click", loginprocess())
     registration.appendChild(button)
 
     doc.appendChild(registration)
@@ -63,17 +54,32 @@ fun registration_form()
 
 }
 
-fun processregistration() = EventListener {
-    val name = document.getElementById("name") as HTMLInputElement
-    val surname = document.getElementById("surname") as HTMLInputElement
+fun loginprocess() = EventListener {
+    val name = document.getElementById("id") as HTMLInputElement
     val pass = document.getElementById("pass") as HTMLInputElement
 
-    val name_str = name.value.toString()
-    val surname_str = surname.value.toString()
+    val id = name.value.toInt()
     val password = pass.value.toString()
 
-    val url = "http://localhost:7575/api/user/registration?firstname=$name_str&lastname=$surname_str&password=$password&country=Ukraine"
+    var succ = false
+    val url = "http://localhost:7575/api/user/login?id=$id&password=$password"
     val req = XMLHttpRequest()
-    req.open("POST", url, true)
+    req.onloadend = fun(event: Event)
+    {
+        val response = req.responseText
+        if(response != "error")
+        {
+            succ = true
+            user_id = id
+            user_pass = password
+            user_name = response
+            login_menu()
+        }
+        else
+        {
+            println("Error login $id $password")
+        }
+    }
+    req.open("GET", url, true)
     req.send()
 }
